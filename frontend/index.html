@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard de Monitoramento</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Dashboard de Monitoramento</h1>
+    <div class="container">
+        <div class="card">
+            <div>CPU</div>
+            <div class="valor" id="cpu">--%</div>
+        </div>
+        <div class="card">
+            <div>Memória</div>
+            <div class="valor" id="memoria">--%</div>
+        </div>
+        <div class="card">
+            <div>Disco</div>
+            <div class="valor" id="disco">--%</div>
+        </div>
+    </div>
+
+    <script>
+        async function atualizarMetricas() {
+            try {
+                const resposta = await fetch("http://127.0.0.1:8000/metricas");
+                const dados = await resposta.json();
+
+                document.getElementById("cpu").innerText = dados.cpu_percent + "%";
+                document.getElementById("memoria").innerText = dados.memoria_percent + "%";
+                document.getElementById("disco").innerText = dados.disco_percent + "%";
+            } catch (erro) {
+                console.error("Erro ao buscar métricas:", erro);
+            }
+        }
+
+        atualizarMetricas();
+        setInterval(atualizarMetricas, 3000);
+    </script>
+</body>
+</html>
