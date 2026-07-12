@@ -1,13 +1,19 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <title>Dashboard de Monitoramento</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
     <h1>Dashboard de Monitoramento</h1>
     <div class="container">
+        <div style="width: 80%; margin-top: 40px;">
+            <canvas id="grafico"></canvas>
+        </div>
         <div class="card">
             <div>CPU</div>
             <div class="valor" id="cpu">--%</div>
@@ -23,21 +29,67 @@
     </div>
 
     <script>
-        async function atualizarMetricas() {
-            try {
-                const resposta = await fetch("http://127.0.0.1:8000/metricas");
-                const dados = await resposta.json();
+    const maxPontos = 20;
+    const labels = [];
+    const dadosCpu = [];
+    const dadosMemoria = [];
 
-                document.getElementById("cpu").innerText = dados.cpu_percent + "%";
-                document.getElementById("memoria").innerText = dados.memoria_percent + "%";
-                document.getElementById("disco").innerText = dados.disco_percent + "%";
-            } catch (erro) {
-                console.error("Erro ao buscar métricas:", erro);
+    const ctx = document.getElementById('grafico').getContext('2d');
+    const grafico = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'CPU %',
+                    data: dadosCpu,
+                    borderColor: '#ff6384',
+                    tension: 0.3
+                },
+                {
+                    label: 'Memória %',
+                    data: dadosMemoria,
+                    borderColor: '#36a2eb',
+                    tension: 0.3
+                }
+            ]
+        },
+        options: {
+            scales: {
+                y: { min: 0, max: 100 }
             }
         }
+    });
 
-        atualizarMetricas();
-        setInterval(atualizarMetricas, 3000);
-    </script>
+    async function atualizarMetricas() {
+        try {
+            const resposta = await fetch("http://127.0.0.1:8000/metricas");
+            const dados = await resposta.json();
+
+            document.getElementById("cpu").innerText = dados.cpu_percent + "%";
+            document.getElementById("memoria").innerText = dados.memoria_percent + "%";
+            document.getElementById("disco").innerText = dados.disco_percent + "%";
+
+            const agora = new Date().toLocaleTimeString();
+            labels.push(agora);
+            dadosCpu.push(dados.cpu_percent);
+            dadosMemoria.push(dados.memoria_percent);
+
+            if (labels.length > maxPontos) {
+                labels.shift();
+                dadosCpu.shift();
+                dadosMemoria.shift();
+            }
+
+            grafico.update();
+        } catch (erro) {
+            console.error("Erro ao buscar métricas:", erro);
+        }
+    }
+
+    atualizarMetricas();
+    setInterval(atualizarMetricas, 3000);
+</script>
 </body>
+
 </html>
