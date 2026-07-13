@@ -34,7 +34,7 @@ source venv/bin/activate
 
 3. Instale as dependências
 ```bash
-pip install fastapi uvicorn psutil
+pip install -r requirements.txt
 ```
 
 4. Rode a API
@@ -42,9 +42,23 @@ pip install fastapi uvicorn psutil
 uvicorn backend.main:app --reload
 ```
 
-5. Abra o `frontend/index.html` no navegador 
+5. Abra o `frontend/index.html` no navegador
 
 A API precisa continuar rodando no terminal enquanto o dashboard estiver aberto.
+
+## Testes e segurança
+
+Este projeto usa um pipeline de CI/CD (GitHub Actions) que roda automaticamente a cada push, com dois checks:
+
+- **Testes automatizados** com pytest, validando as rotas da API
+- **Análise de segurança estática** com Bandit, verificando padrões inseguros no código
+
+Para rodar localmente:
+```bash
+pip install -r requirements-dev.txt
+pytest tests/ -v
+bandit -r backend agent
+```
 
 ## Próximos passos
 
